@@ -1,15 +1,18 @@
 package values
 
-import "net/url"
+import (
+	"go-short-me/internal/component/gsm/core/domain/seedwork/validator"
+)
 
 type Url struct {
 	Value string
 }
 
 func NewUrl(value string) (*Url, error) {
-	_, err := url.Parse(value)
+	err := validator.UrlParse(value)
 	if err != nil {
 		return nil, err
 	}
+
 	return &Url{Value: value}, nil
 }

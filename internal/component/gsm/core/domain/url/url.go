@@ -1,9 +1,22 @@
 package url
 
-import "go-short-me/internal/component/gsm/core/domain/url/values"
+import (
+	"context"
+	"go-short-me/internal/component/gsm/core/domain/seedwork/interfaces"
+	"go-short-me/internal/component/gsm/core/domain/url/values"
+)
 
 type Url struct {
-	Url values.Url
+	url        values.Url
+	createdURL values.CreatedUrl
+}
+
+func (u *Url) Url() values.Url {
+	return u.url
+}
+
+func (u *Url) CreatedURL() values.CreatedUrl {
+	return u.createdURL
 }
 
 func NewUrl(url string) (*Url, error) {
@@ -12,14 +25,22 @@ func NewUrl(url string) (*Url, error) {
 		return nil, err
 	}
 
-	return &Url{Url: *u}, nil
+	return &Url{url: *u}, nil
 }
 
-func (u *Url) CreateShortURL(url string) (string, error) {
-	nUrl, err := NewUrl(url)
+func (u *Url) CreateShortURL(db interfaces.Database) (string, error) {
+	nUrl, err := values.NewCreatedUrl()
 	if err != nil {
 		return "", err
 	}
 
-	return nUrl.Url.Value, nil
+	u.createdURL.Value = nUrl.Value
+
+	ctx := context.Background()
+	err = db.InsertURL(ctx, u)
+	if err != nil {
+		return "", err
+	}
+
+	return u.createdURL.Value, nil
 }
